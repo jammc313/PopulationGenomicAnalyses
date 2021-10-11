@@ -58,7 +58,7 @@ When you have merged together your reference dataset and finished filtering it, 
 
 #### Running PCA and ADMIXTURE
 There are some guidelines for running PCA at the popgen lab link above, and in the SCRIPTS folder. Note that before doing a PCA you should prune your data for SNPs in LD. Go to the admixture manual and search for `prune` and you will find out how to carry out the pruning:
-http://software.genetics.ucla.edu/admixture/admixture-manual.pdf
+https://dalexander.github.io/admixture/admixture-manual.pdf
 
 After that you can run PCA and Admixture, remember that Admixture takes quite a lot of time!
 
