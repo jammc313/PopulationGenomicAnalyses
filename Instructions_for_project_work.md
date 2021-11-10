@@ -1,7 +1,7 @@
 # Investigating population structure and affinity of unidentified human populations 
 
 ## Instructions for project work
-For this project you should organize yourselves into groups of 3 or 4. Work together to complete the project, and the end result should be a scientific report (including Abstract, Introduction, Materials & Methods, Results, Discussion, References, Appendices) of at least 15 pages. You will present your results together on the 15th October (which is also the deadline for the written report).
+For this project you should organize yourselves into groups of 3 or 4. Work together to complete the project, and the end result should be a scientific report (including Abstract, Introduction, Materials & Methods, Results, Discussion, References, Appendices) of approximately 15 pages. You will present your results together on the **15th October** (which is also the deadline for the written report).
 
 ### DATA
 You have been given some reference and target populations. They can be found here:
@@ -13,9 +13,7 @@ You have been given some reference and target populations. They can be found her
 You will also find some useful scripts in the `SCRIPTS` folder.
 
 ## Your task
-Ultimately you need to identify what populations you have in the `Unknown.fam`.
-
-To achieve this you have been given a bunch of references that should be useful for comparison.
+Ultimately you need to identify what populations you have in the `Unknown.fam`. To achieve this you have been given some reference datasets that should be useful for comparison.
 
 
 
@@ -30,7 +28,6 @@ Below is a rough outline of what you need to do
 * PCA
 * ADMIXTURE
 * Projected PCA 
-* Admixture dating
 
 
 ## More thorough instructions
