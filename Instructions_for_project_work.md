@@ -1,36 +1,30 @@
 # Investigating population structure and affinity of unidentified human populations 
 
 ## Instructions for project work
-For this project you should organize yourselves into groups of 3 or 4. Work together to complete the project, and the end result should be a scientific report (including Abstract, Introduction, Materials & Methods, Results, Discussion, References, Appendices) of approximately 15 pages. You will present your results together on the **15th October** (which is also the deadline for the written report).
+For this project you should organize yourselves into groups of 3 or 4. Work together to complete the project, and the end result should be a scientific report (including Abstract, Introduction, Materials & Methods, Results, Discussion, References, Appendices) of approximately 15 pages. You will present your results together on the **15th October**. This is also the deadline for the written report.
 
-### DATA
-You have been given some reference and target populations. They can be found here:
+### Overview
+You have been given genetic data from target populations and reference datasets for comparison. They can be found here:
 
 ```
 /proj/uppmax2021-2-19/nobackup/HUMAN_POPGEN_PROJECT/IN_DATA
 ```
 
-You will also find some useful scripts in the `SCRIPTS` folder.
+You will also find some useful scripts in the `SCRIPTS` folder. Your task is to try to identify the mystery populations you have in the `Unknown.fam`. 
 
-## Your task
-Ultimately you need to identify what populations you have in the `Unknown.fam`. To achieve this you have been given some reference datasets that should be useful for comparison.
+## Basic workflow
+The first thing to note is that your unknown samples are "different" somehow. You should look at the genotyping rate (i.e. missingness) and compare this between your unknown and reference datasets. An important part of your task is to figure out what kind of samples you have, and why they are valuable. A further hint is that it can be helpful to look at the sample names in the data files! 
 
-
-## Workflow
-Your unknown samples are "different" somehow, a hint is to look at the genotyping rate - i.e. missingness. Part of your first task is to figure out what types of samples you have, and why they are valuable even though they look the way they do. It can also be helpful to look at their names in the data files. You should not apply the filters to your unknown samples! 
-
-Below is a rough outline of what you need to do
+Below is a very rough outline of what you need to do
 
 * Check for related individuals in your reference dataset (and filter them out)
 * Unify SNP names across your dataset (by position)
-* Filter the reference individuals & SNPs
+* Filter the **reference** individuals & SNPs (**not** your unknown samples)
 * Merge datasets
 * PCA
 * ADMIXTURE
 * Projected PCA 
 
-
-## More thorough instructions...
 
 ## Population structure analysis
 Before we start here are some basic Unix/Linux commands if you are not used to working in a Unix-style terminal:
@@ -55,17 +49,22 @@ Display file content:
 	less - open file for viewing
 ```	
 
-#### Filtering out related individuals
-In the `SCRIPTS` folder, there is a script called `sbatch_KING.sh` that can be used to run [KING](http://people.virginia.edu/~wc9c/KING/manual.html). Have a look inside it for instructions on how to run the script. Look at the manual and try and figure out how the software works. After you have run the script, have a look at the produced output files and figure out how to remove the related individuals.
+### Setup
+Create your own working directory within the storage project.
+```
+cd /proj/uppmax2021-2-19/nobackup/HUMAN_POPGEN_PROJECT/ # move into the Uppmax project for this course
+mkdir your_directory_name # e.g. Firstname_Lastname
+```
+Do not edit the original data files in "IN_DATA" or "SCRIPTS". Copy the contents of "SCRIPTS" into your working directory, and create softlinks to the reference datasets and unknown samples. 
 
-#### Filtering and merging population genomic data using PLINK
+### Filtering and merging population genomic data using PLINK
 Link to PLINK site:[https://www.cog-genomics.org/plink2](https://www.cog-genomics.org/plink2)
 
-PLINK is a software for fast and efficient filtering, merging, editing of large SNP datasets, and exports to different outputs directly usable in other programs. Stores huge datasets in compact binary format from which it reads-in data very quickly.
+PLINK is a software for fast and efficient filtering, merging, editing of large SNP datasets, and exports to different outputs directly usable in other programs. It stores huge datasets in compact binary format from which data can be read-in very quickly.
  
 Running the program:
 
-The software is already pre-installed on Rackham, you just have to load it. Working on Rackham type:
+The software is already pre-installed on Rackham, you simply have to load it. Working on Rackham type:
 ```
 module load bioinfo-tools 
 module load plink/1.90b4.9 
@@ -94,15 +93,6 @@ tped format: transposed ped format (.tfam and .tped files)
 tfam sample info, .tped marker and genotype info in transposed format
 lgen format: long format (see manual, not used that often)
 
-
-Setup
-Create your own working directory within the storage project.
-```
-cd /proj/uppmax2021-2-19/nobackup/HUMAN_POPGEN_PROJECT/ # move into Uppmax project for this course
-mkdir your_directory_name (e.g. Firstname_Lastname)
-```
-Do not edit the original data files in "IN_DATA" or "SCRIPTS". Copy the contents of "SCRIPTS" into your working directory, and create softlinks to the reference datasets and unknown samples. 
-
 The "Unknown" samples are files containing SNPs from unknown population groups in bed file format. You are going to figure out the ancestry of these population groups during this practical. 
 
 Look at the `.bim` (markers) and `.fam` (sample info) files by typing:
@@ -110,58 +100,56 @@ Look at the `.bim` (markers) and `.fam` (sample info) files by typing:
 less unk1.bim
 ``` 
 
-do the same for the `.fam` file
+do the same for the `.fam` file:
 ```
 less unk1.fam 
 ```
-As mentioned before the `.bim` file store the variant markers present in the data and `.fam` lists the samples. (you can try to look at the .bed as well, but this file is in binary format and cannot be visualized as text if you want to see the specific genotype info you must export the bed format to a ped format)
+As mentioned before the `.bim` file store the variant markers present in the data and `.fam` lists the samples. You can try to look at the .bed as well, but this file is in binary format and cannot be visualized as text. If you want to see the specific genotype info you must export the .bed format to a .ped format.
 
-Read in a  bed file dataset and convert to ped format by typing/pasting in:
+Read in a .bed file dataset and convert to .ped format by typing/pasting in:
 ```
 plink --bfile unk1 --recode --out unk1_ped 
 ```
 #### Look at the info that Plink prints to the screen. How many SNPs are there in the data? How many individuals? How much missing data? Compare this level of missing data to that of a reference dataset. Is there a difference, if so; why do you think that is the case? HINT: Look at the names of the unknown samples!
 
-#### Look at the first few lines of the newly generated .map (sample info) and .ped (marker and genotype info) files using the more command as demonstrated above
+#### Look at the first few lines of the newly generated .map (sample info) and .ped (marker and genotype info) files using the more command as demonstrated above.
 
-Read in bed/ped file and convert to tped
+Reading in a .bed/.ped file and converting to .tped:
 ```
 plink --bfile unk1 --recode transpose --out unk1_tped 
 plink --file unk1_ped --recode transpose --out unk1_tped 
 ```
-Do you see the difference in the two commands above for reading from a bed (--bfile) and reading from a ped (--file) file. Which one takes longer to read-in?
+Do you see the difference in the two commands above for reading from a .bed (--bfile) and reading from a .ped (--file) file? Which one takes longer to read-in?
 
-Look at the first few lines of the  `.tfam` and `.tped` files by using the `less` command
+Look at the first few lines of the  .tfam and .tped files by using the `less` command
 
 #### Can you see what symbol is used to encode missing data?
 
-Note- try to always work with bed files, they are much smaller and takes less time to read in. 
-See this for yourself by inspecting the difference in file sizes:
+Note: try to always work with .bed files; they are much smaller and take less time to read in. You can see this for yourself by inspecting the difference in file sizes:
 
 ```
 ls -lh * 
 ```
 
-Plink can convert to other file formats as well, you can have a look in the manual for the different types of conversions
+Plink can convert to other file formats as well, you can have a look in the manual for the different types of conversions possible.
 
-## Data filtering. Missingness, HWE and MAF
+## Data filtering: Missingness, HWE and MAF
 Now we will start to clean our data before further analysis. Take note of how many individuals and markers are being filtered out of your dataset at each stage; this is important information for the report.
 
 Look at the missingness information of each individual and SNP by typing:
 ```
 plink  --bfile unk1 --missing --out test1miss
 ```
-Look at the two generated files by using the `less` command (q to quit)
+Look at the two generated files by using the `less` command (q to quit):
 ```
 less test1miss.imiss
 less test1miss.lmiss
 ```
 
-The `.imiss` contains the individual missingness and the `.lmiss` the marker missingness
-Do you understand the columns of the files? The last three columns are the number of missing, the total, and the fraction of missing markers and individuals for the two files respectively
+The `.imiss` contains the individual missingness and the `.lmiss` the marker missingness. Do you understand the columns of the files? The last three columns are the number of missing, the total, and the fraction of missing markers and individuals for the two files respectively.
 
-We will start our filtering process by filtering for missing data
-First, we filter for marker missingness, we have 1000’s of markers but only 80 individuals, so we want to try to save filtering out unnecessary individuals
+We will start our filtering process by filtering for missing data.
+First, we filter for marker missingness, we have 1000’s of markers but only 80 individuals, so we would prefer to filter markers rather than individuals.
 
 Paste in the command below to filter out markers with more than 10% missing data
 ```
@@ -176,7 +164,7 @@ plink --bfile unk2 --mind 0.15 --make-bed --out unk3
 ```
 Look at the screen output, how many individuals were excluded?
 
-To filter for minimum allele frequency is not always optimal, especially if you are going to merge your data with other datasets in which the alleles might be present. But we will apply a MAF filter in this case
+Filtering for minimum allele frequency is not always optimal, especially if you intend later to merge your data with other datasets in which those alleles might be present at higher frequencies. So save this step until your reference dataset is fully merged, then apply a MAF filter:
 
 Filter data for a minimum allele frequency of 1% by pasting in:
 ```
@@ -184,9 +172,7 @@ plink --bfile unk3 --maf 0.01 --make-bed --out unk4
 ```
 How many SNPs are left?
 
-Now we will filter for SNPs out of Hardy-Weinberg equilibrium. Most likely, SNPs out of HWE usually indicates problems with the genotyping. However, to avoid filtering out SNPs that are selected for/against in certain groups (especially when working with case/control data) filtering HWE per group is recommended. After, only exclude the common SNPs that fall out of the HWE in the different groups - Exercise OPTIONAL 1. 
-
-For reasons of time, we will now just filter the entire dataset for SNPs that aren’t in HWE with a significance value of 0.001
+You can also filter for SNPs out of Hardy-Weinberg equilibrium. Most likely, SNPs out of HWE usually indicates problems with the genotyping. However, to avoid filtering out SNPs that are selected for/against in certain groups (especially when working with case/control data) filtering HWE per group is recommended. After, only exclude the common SNPs that fall out of the HWE in the different groups. However, for reasons of time, you can simply filter the entire dataset for SNPs that aren’t in HWE with a significance value of 0.001
 ```
 plink --bfile unk4 --hwe 0.001 --make-bed --out unk5
 ```
@@ -199,49 +185,35 @@ plink --bfile unk5 --hardy --out hardy_unk5
 ```
 Look at file hardy_unk5.hwe, see if you understand the output?
 
-There are additional filtering steps that you can go further. PLINK site on the side lists all the cool commands that you can use to treat your data. Usually, we also filter for related individuals and do a sex-check on the X-chromosome to check for sample mix-ups. 
-
-You normally also want to merge your dataset with already published ones or with some other data that you have access to and you are interested to combine. If you have extra time we recommend you to do the exercise *OPTIONAL 2*. However, if you don’t, please just read through so you can have a grasp of how and why you do those steps.
+There are additional filtering steps that you can go further. The PLINK site manual all the cool commands that you can use to treat your data. Usually, we also filter for related individuals and do a sex-check on the X-chromosome to check for sample mix-ups. Let's filter out related individuals from your reference datasets:
+In the `SCRIPTS` folder, you will find a script named `sbatch_KING.sh`. This can be used to run [KING](http://people.virginia.edu/~wc9c/KING/manual.html) and filter out related individuals from your dataset. Take a look inside for instructions on how to run the script. Look at the manual and try and figure out how the software works and think about why this is an important step. After you have run the script, look at the produced output files and figure out how to remove the related individuals from your datases. 
 
 Take note: you should not apply the `maf` filtering until you have your final references dataset! 
-
-```
---mind 0.01
---geno 0.01
---hwe 0.0000001
---maf 0.01
-```
-Your Unknown samples should not go through any filtering. Do you know why?
 
 =============================================================================
 
 
 #### Data merging and strand flipping
 
-The `rename_SNP.py` script can be used on the `.bim` files to change the SNP name into the names based on position. This in needed when merging datasets from different SNP chips since the same position can have different names on different chips. When merging your reference dataset you want to make sure to only keep overlapping SNPS.
+The `rename_SNP.py` script can be used on the `.bim` files to change the SNP name into the names based on position. This in needed when merging datasets from different SNP chips since the same position can have different names on different chips. When merging the different reference datasets, and then finally your target dataset with the with the reference dataset, you want to make sure to only keep overlapping SNPS.
 
 Usually, when you merge your data with another dataset there are strand issues. The SNPs in the other dataset might be typed on the reverse DNA strand and yours on the forward, or vice versa. Therefore you need to flip the strand to the other orientation for all the SNPs where there is a strand mismatch. One should not flip C/G and A/T SNPs because one cannot distinguish reverse and forward orientation (i.e. C/G becomes G/C unlike other SNPs i.e. G/T which become C/A). Therefore before merging and flipping all A/T and C/G SNPs must be excluded. However, this can be a problem since some of your SNPs in your dataset may be monomorphic when you don't apply the MAF filter. I.E in the bim file they will appear as C 0 (with 0 meaning missing). So you don't know what kind of SNP it is, it can be C G or C T for instance if it is C G it needs to be filtered out but not if it is C T.
 
-Therefore, before merging our data to other datasets it is important to first merge your data with a fake / reference_individual, that you prepare, which is heterozygous at every SNP position. This “fake” reference individual you can easily prepare from the SNP info file you get from the genotyping company or your own genomics processing software (such as Genome Studio from Illumina). You can also prepare it from data downloaded for each SNP from a web-database such as dbSNP. 
+Therefore, before merging our data to other datasets it is important to first merge your data with a fake / reference_individual, that you prepare, which is heterozygous at every SNP position. This “fake” reference individual you can easily prepare from the SNP info file you get from the genotyping company or your own genomics processing software (such as Genome Studio from Illumina). You can also prepare it from data downloaded for each SNP from a web-database such as dbSNP. This fake / reference individual has been provided for you in the Schlebusch reference data directory. 
 
-Have you noticed that PLINK sometimes generates a .nof file and in the log file output the following is mentioned
+Have you noticed that PLINK sometimes generates a .nof file and in the log file output the following is mentioned:
 902 SNPs with no founder genotypes observed
 Warning, MAF set to 0 for these SNPs (see --nonfounders)
-This is the monomorphic SNPs in your data.
+These are the monomorphic SNPs in your data.
 
-So our first step will be merging with a reference that we prepared form SNP info data beforehand:
-Copy the RefInd files (bim, bed, and fam) from your local data folder to the working folder:
+So our first step will be merging with a reference that we prepared from SNP info data beforehand:
 
-Extract your SNPs of interest from the RefInd (remember you filtered out several SNPs already)
-
-
+Extract your SNPs of interest from the RefInd (remember you filtered out several SNPs already).
 ```
 plink --bfile RefInd1 --extract unk5.bim --make-bed --out RefInd1_ext 
 ```
 
 Make a list of CG and AT SNPs in your data:
-
-
 ```
 sed 's/\t/ /g' RefInd1_ext.bim | grep " C G" >ATCGlist
 sed 's/\t/ /g' RefInd1_ext.bim | grep " G C" >>ATCGlist
@@ -249,98 +221,65 @@ sed 's/\t/ /g' RefInd1_ext.bim | grep " A T" >>ATCGlist
 sed 's/\t/ /g' RefInd1_ext.bim | grep " T A" >>ATCGlist
 ```
 
-Exclude the CG and AT SNPs form both your reference ind and data
-
-
+Exclude the CG and AT SNPs from both your reference individuals and target data:
 ```
 plink  --bfile RefInd1_ext --exclude ATCGlist --make-bed --out RefInd1_ext2 
 plink  --bfile unk5 --exclude ATCGlist --make-bed --out unk6
 ```
 
-Merge with RefInd
-
-
+Merge with RefInd:
 ```
 plink --bfile RefInd1_ext2 --bmerge unk6.bed unk6.bim unk6.fam --make-bed --out MergeRef1  
 ```
 
 An error is generated because of the strand mismatches. The generated file MergeRef1.missnp
-contains the info on the SNPs where there are mismatches - flip the strand of these SNPs in your data.
-
-
+contains the info on the SNPs where there are mismatches - flip the strand of these SNPs in your data:
 ```
 plink --bfile unk6 --flip MergeRef1-merge.missnp --make-bed --out  unk7  
 ```
 
 Try merging again:
-
-
 ```
 plink --bfile RefInd1_ext2 --bmerge unk7.bed unk7.bim unk7.fam --make-bed --out MergeRef2  
 ```
 
-Now it works.
-No .nof file is generated which means none of your SNPs are monomorphic anymore
+Now it works. No .nof file is generated which means none of your SNPs are monomorphic anymore (as you would expect!).
 
-Now we will merge our data with a set of reference populations that we get from an already published study such as HapMap data or HGDP population data. Many of the sites archiving the data provided them in PLINK format as well. For this practical, we selected a few Ref pops from HapMap and HGDP to compare your Unknown populations to.
+Now we will merge our data with a set of reference populations that we get from an already published study. Many of the sites archiving the data provided them in PLINK format as well. For this practical, we selected a few Reference datasets containing different African populations to compare against your Unknown populations.
 
-Copy the RefInd files (bim, bed and fam) from your local data folder to the working folder:
-
-Look at the .fam file, do you recognize some of these pops? There are two HapMap and three HGDP populations.
+Look at the .fam files of your reference datasets, do you recognize some of these pops? 
 
 First, extract the SNPs we have in our data from the downloaded RefPops
-
-
 ```
 plink --bfile refpops1 --extract MergeRef2.bim --make-bed --out refpops2  
 ```
 
-Now we will merge our data with the downloaded data
-
-
+Now we will merge our data with the downloaded data:
 ```
 plink --bfile MergeRef2 --bmerge refpops2.bed refpops2.bim refpops2.fam --make-bed --out MergeRefPop1  
 ```
 
-Another strand issue, flip the strands of the refPop datasets to be merged
+When you run into strand issues, flip the strands of the refPop datasets to be merged as shown above, and try merging until it works.
 
-
-```
-plink --bfile refpops2 --flip MergeRefPop1-merge.missnp --make-bed --out refpops3  
-```
-
-Try merge again:
-
+Look at your screen output. You will see that the Refpops only contains SNPs that overlap with a small percentage of the SNPs in the Unknown Pops data (~15 000 vs ~95 000). We will now again filter for SNP missingness to exclude all of the extra SNPs in the Unknown data. We want to retain only the overlapping SNPs - if we did not do this, we would find later in our analysis that all the unknown individuals would cluster together separately from the reference dataset. Thatresult would occur due to the non-overlapping sets of SNPs present between the reference and Unknown data, rather than any true genetic dissimilarities!
 
 ```
-plink --bfile MergeRef2 --bmerge refpops3.bed refpops3.bim refpops3.fam --make-bed --out MergeRefPop2 
+plink --bfile MergeRefPop1 --geno 0.1 --make-bed --out MergeRefPop1fil 
 ```
 
-It works now. Look at your screen output. You will see that the Refpops only contains SNPs that overlap with a small percentage of the SNPs in the UNknown Pops data (~15 000 vs ~95 000). We will now again filter for SNP missingness to exclude all of the extra SNPs in the Unknown Pop data (Retain only the overlap).
+How many SNPs are left for your analyses? Keep note of this.
 
+The last thing to do is to extract your fake/Ref_ind from your data:
 ```
-plink --bfile MergeRefPop2 --geno 0.1 --make-bed --out MergeRefPop2fil 
-```
-
-How many SNPs are left for your analyses?
-
-The last thing to do is to extract your fake/Ref_ind from your data.
-
-
-```
-plink --bfile MergeRefPop2fil --remove RefInd1.fam --make-bed --out MergeRefPop3  
+plink --bfile MergeRefPop1fil --remove RefInd1.fam --make-bed --out MergeRefPop2  
 ```
 
 This is the final files for the next exercise. Rename them:
-
-
 ```
-mv MergeRefPop3.bed PopStrucIn1.bed; mv MergeRefPop3.bim PopStrucIn1.bim; mv MergeRefPop3.fam PopStrucIn1.fam 
+mv MergeRefPop2.bed PopStrucIn1.bed; mv MergeRefPop2.bim PopStrucIn1.bim; mv MergeRefPop2.fam PopStrucIn1.fam 
 ```
 
 Now you have generated your input files for the next exercise which will deal with population structure analysis. You will look at the population structure of your unknown samples in comparison to the known reference populations.
-
-When you have merged together your reference dataset and finished filtering it, you can merge it together with your `unkown` data.
 
 =============================================================================
 
@@ -358,8 +297,6 @@ module load bioinfo-tools
 module load ADMIXTURE/1.3.0
 
 ```
-
-
 A basic ADMIXTURE run looks like this:
 
 ```
@@ -544,11 +481,6 @@ firefox http://localhost:YOUR_PORT_NUMBER
 Once you are finished with looking at the PONG output you can click and save some output to file and then close the program by hitting `ctrl - c` in the terminal tab running it. 
 
 
-
-
-
-
-
 ## Principal component Analysis with Eigensoft
 
 The last population structure method we will look at is Principal Components Analysis with Eigensoft.
@@ -664,8 +596,6 @@ Look at the `PopStrucIn1.snpweight_out` file. The file contains a list of snps a
 Look at your previous generated PC plot `PopStrucIn1_Proj_PCA1.pdf`
 Axis one (PC1) explains ~8% of the variation in your whole Ref_pop dataset. It is the axis that defines the difference between African and non-African populations. To generate a sorted list of the SNPs that would be the best to type to look at the difference between African and non-Africans paste the following command:
 
-
-
 ```
 sed 's/ \+ /\t/g' PopStrucIn1.snpweight_out | sed 's/^\t//g' | cut -f1,3 | sort -r -n -k 3,3  >topSNPsPc1
 ```
@@ -673,7 +603,7 @@ sed 's/ \+ /\t/g' PopStrucIn1.snpweight_out | sed 's/^\t//g' | cut -f1,3 | sort 
 Look at the topSNPsPc1 file that is generated
 
 
-If you are interested in the frequency of the top SNP in your data. Copy the two scripts below:
+If you are interested in the frequency of the top SNPs in your data. Copy the two scripts below:
 
 ```
 Extract_snp_from_bed_make_Barplot
@@ -686,7 +616,7 @@ Open the main script and paste the rs name of the SNP you are interested in in t
 ./Extract_snp_from_bed_make_Barplot
 ```
 
-You can run the script multiple times for different top of the list  (positive) and bottom of the list (negative) and middle (0) SNPs (each time substitute the particular rs number in the script) and compare the output PDFs.
+You can run the script multiple times for different top of the list (positive) and bottom of the list (negative) and middle (0) SNPs (each time substitute the particular rs number in the script) and compare the output PDFs.
 (The script is not adapted to visualize SNP frequencies for SNPs that contain missing data. So if you get the message
 mv: cannot stat `rsxxxx_counts_frequencies.txt': No such file or directory
 it means there are missing data for this SNP. Just try another SNP until you get representatives of the top bottom and middle SNPs. Then compare the plots to each other)
@@ -703,16 +633,15 @@ This is the end of section 2. Did you figure out who the unknown populations whe
 
 ##################################################################################
 
-Note that before doing a PCA you should prune your data for SNPs in LD. Go to the admixture manual and search for `prune` and you will find out how to carry out the pruning: https://dalexander.github.io/admixture/admixture-manual.pdf
+Note that before doing a PCA you should prune your data for SNPs in LD. Think about why this is very important! Go to the admixture manual and search for `prune` and you will find out how to carry out the pruning: https://dalexander.github.io/admixture/admixture-manual.pdf
 
-After that you can run PCA and Admixture, remember that Admixture takes quite a lot of time!
+After that you can run PCA and Admixture, remember that Admixture and Projected PCA both take quite a lot of time! (You will require up to 3 days for each to finish in time).
 
-It's a good idea to run PCA on just your reference dataset as well as the final dataset with both the references and the unkown samples.
+It is a good idea to run PCA on just your reference dataset as well as the final dataset with both the references and the unkown samples. Look at the difference in projections between the two and think carefully about why any differences may have occurred. 
 
 
 #### Projected PCA
-In `SCRIPTS` there is a script called `prep_run_proj_pca.sh` that can be used to run a projected PCA. 
-It will require some tweaking and you will need a way to plot it. Contact me when are ready to run it! 
+In `SCRIPTS` there is a script called `prep_run_proj_pca.sh` that can be used to run a projected PCA. (Do you know what a Projected PCA is for? And why it is useful in this case?). The script will require some tweaking and you will need a way to plot it. Contact me when are ready to run it! 
 
 
 ### Further reading
